@@ -1,18 +1,16 @@
 # Ansible Role: Development
 
-The **`development` role** provides a consistent development and infrastructure engineering workstation experience for Debian and Ubuntu systems.
+The **`development`** role provides a consistent development workstation experience for infrastructure engineers, platform engineers, SREs, DevOps practitioners, and homelab operators.
 
-The role installs and configures a curated set of development tools commonly used by platform engineers, DevOps engineers, SREs, and homelab operators. Tools are installed using vendor-supported package repositories whenever possible, allowing updates to be managed through the operating system package manager while maintaining a simple and maintainable implementation.
-
-In addition to development tooling, the role can install common development packages and configure an isolated Ansible installation.
+The role installs common development and automation tooling using vendor-supported repositories whenever possible, provides an isolated Ansible installation, and supports configurable custom commands to standardize environment-specific workflows.
 
 ---
 
 ## Requirements
 
-This role performs system-level configuration and executes privileged tasks using Ansible privilege escalation.
+This role performs system-level configuration and requires privilege escalation.
 
-The account used to run the role must be permitted to use sudo on the target host.
+The executing account must be permitted to use sudo on the target host.
 
 Supported platforms:
 
@@ -28,47 +26,55 @@ Supported platforms:
 ### Development Packages
 
 - Install common development packages
-- Install shell productivity tools
-- Install infrastructure automation utilities
+- Install shell productivity utilities
 - Install networking and troubleshooting tools
-- Skip package installation when disabled
+- Install infrastructure automation utilities
+- Fully customizable package list
 
 ### Ansible
 
 - Install Ansible in an isolated Python virtual environment
 - Install Ansible Lint
 - Create command wrappers in `/usr/local/bin`
-- Avoid system-wide Python package conflicts
+- Avoid system-wide Python conflicts
 
 ### OpenTofu
 
-- Configure the official OpenTofu package repository
-- Install OpenTofu using APT
+- Configure the official OpenTofu repository
+- Install OpenTofu through APT
 - Receive updates through standard package management
 
-### Infisical CLI
+### Infisical
 
-- Configure the official Infisical package repository
-- Install the Infisical CLI using APT
+- Configure the official Infisical repository
+- Install the Infisical CLI through APT
 - Receive updates through standard package management
 
 ### Kubernetes Tooling
 
-- Configure the official Kubernetes package repository
-- Install kubectl using APT
+- Configure the official Kubernetes repository
+- Install kubectl through APT
 - Support configurable Kubernetes repository tracks
 
 ### Helm
 
-- Configure the Helm package repository
-- Install Helm using APT
+- Configure the official Helm repository
+- Install Helm through APT
 - Receive updates through standard package management
 
 ### Talosctl
 
 - Download Talosctl directly from official releases
-- Automatically select the correct architecture
+- Automatically select the appropriate architecture
 - Install to `/usr/local/bin`
+
+### Development Commands
+
+- Create custom commands in `/usr/local/bin`
+- Support simple command aliases
+- Support fully customized shell wrappers
+- Configure commands through inventory variables
+- Standardize workstation workflows
 
 ---
 
@@ -86,13 +92,14 @@ development_kubectl_manage: true
 development_helm_manage: true
 development_talosctl_manage: true
 development_packages_manage: true
+development_commands_manage: false
 ```
 
 ---
 
 ### Ansible Configuration
 
-The Ansible virtual environment location:
+Configure the Ansible installation path:
 
 ```yaml
 development_ansible_path: /opt/ansible
@@ -104,7 +111,7 @@ Default installation layout:
 /opt/ansible/.venv
 ```
 
-Wrapper commands are installed into:
+Installed wrapper commands:
 
 ```text
 /usr/local/bin/ansible
@@ -117,25 +124,21 @@ Wrapper commands are installed into:
 
 ### Kubernetes Repository Track
 
-The Kubernetes package repository can be configured using:
+Configure the Kubernetes repository track:
 
 ```yaml
-development_kubernetes_minor_version: "v1.36"
+development_kubectl_repository_version: "v1.36"
 ```
 
 Example:
 
 ```yaml
-development_kubernetes_minor_version: "v1.37"
+development_kubectl_repository_version: "v1.37"
 ```
-
-This determines which Kubernetes package repository is configured for kubectl installations.
 
 ---
 
 ### Development Packages
-
-Packages are installed using APT with `state: present`.
 
 Default package set:
 
@@ -170,7 +173,7 @@ development_packages:
   - traceroute
 ```
 
-Additional packages can be added or the list can be replaced entirely:
+Override the list completely:
 
 ```yaml
 development_packages:
@@ -180,6 +183,102 @@ development_packages:
   - tmux
   - htop
 ```
+
+---
+
+### Development Commands
+
+Custom commands can be deployed into `/usr/local/bin`.
+
+Enable command management:
+
+```yaml
+development_commands_manage: true
+```
+
+#### Simple Commands
+
+Create lightweight aliases:
+
+```yaml
+development_commands:
+  - name: k
+    command: kubectl
+
+  - name: t
+    command: talosctl
+```
+
+This produces:
+
+```text
+/usr/local/bin/k
+/usr/local/bin/t
+```
+
+Equivalent to:
+
+```bash
+#!/bin/sh
+exec kubectl "$@"
+```
+
+and
+
+```bash
+#!/bin/sh
+exec talosctl "$@"
+```
+
+#### Custom Commands
+
+Create fully customized wrappers:
+
+```yaml
+development_commands:
+  - name: tf
+    content: |
+      #!/bin/sh
+
+      set -a
+      . /etc/infisical/dev1.env
+      set +a
+
+      exec infisical run -- tofu "$@"
+
+  - name: ap
+    content: |
+      #!/bin/sh
+
+      set -a
+      . /etc/infisical/dev1.env
+      set +a
+
+      exec infisical run -- ansible-playbook "$@"
+```
+
+Result:
+
+```text
+/usr/local/bin/tf
+/usr/local/bin/ap
+```
+
+Usage:
+
+```bash
+tf plan
+tf apply
+
+ap site.yml
+```
+
+Each command entry must define:
+
+- `name`
+- exactly one of:
+  - `command`
+  - `content`
 
 ---
 
@@ -192,15 +291,15 @@ The role manages vendor-supported repositories for:
 - Kubernetes
 - Helm
 
-Repository signing keys are managed automatically.
+APT signing keys are managed automatically.
 
-APT key material is stored within:
+APT keyrings are stored in:
 
 ```text
 /etc/apt/keyrings
 ```
 
-Infisical uses the vendor-supported keyring location:
+Infisical uses the vendor-recommended location:
 
 ```text
 /usr/share/keyrings/infisical-archive-keyring.gpg
@@ -211,9 +310,9 @@ Infisical uses the vendor-supported keyring location:
 ## Example Playbook
 
 ```yaml
+---
 - name: Development Workstation
   hosts: development
-
   become: true
 
   roles:
@@ -224,7 +323,7 @@ Infisical uses the vendor-supported keyring location:
 
 ## Example Inventory
 
-Install all default tooling:
+### Install All Default Tooling
 
 ```yaml
 development_ansible_manage: true
@@ -235,7 +334,7 @@ development_helm_manage: true
 development_talosctl_manage: true
 ```
 
-Disable Kubernetes-related tooling:
+### Disable Kubernetes Tooling
 
 ```yaml
 development_kubectl_manage: false
@@ -243,29 +342,50 @@ development_helm_manage: false
 development_talosctl_manage: false
 ```
 
-Track a newer Kubernetes repository:
+### Track a Newer Kubernetes Version
 
 ```yaml
-development_kubernetes_minor_version: "v1.37"
+development_kubectl_repository_version: "v1.37"
 ```
 
-Override the default package list:
+### Configure Custom Commands
 
 ```yaml
-development_packages:
-  - git
-  - jq
-  - yq
-  - curl
-  - tmux
-  - htop
+development_commands_manage: true
+
+development_commands:
+  - name: tf
+    content: |
+      #!/bin/sh
+
+      set -a
+      . /etc/infisical/dev1.env
+      set +a
+
+      exec infisical run -- tofu "$@"
+
+  - name: ap
+    content: |
+      #!/bin/sh
+
+      set -a
+      . /etc/infisical/dev1.env
+      set +a
+
+      exec infisical run -- ansible-playbook "$@"
+
+  - name: k
+    command: kubectl
+
+  - name: t
+    command: talosctl
 ```
 
 ---
 
 ## Example Result
 
-After execution, the host will contain tools such as:
+After execution, the host may contain:
 
 ```text
 ansible
@@ -287,6 +407,11 @@ ripgrep
 bat
 fd-find
 direnv
+
+k
+t
+tf
+ap
 ```
 
 Repository-managed tooling receives updates through standard APT workflows.
@@ -298,9 +423,12 @@ Repository-managed tooling receives updates through standard APT workflows.
 | Tag | Description |
 |------|-------------|
 | `packages` | Development package installation |
-| `ansible` | Ansible virtual environment and wrappers |
+| `ansible` | Ansible installation and configuration |
 | `opentofu` | OpenTofu repository and installation |
 | `infisical` | Infisical repository and installation |
 | `kubectl` | Kubernetes repository and kubectl installation |
-| `helm` | Helm repository and installation |
+| `helm` | Helm installation |
 | `talosctl` | Talosctl installation |
+| `commands` | Custom command creation |
+
+---

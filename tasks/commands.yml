@@ -1,0 +1,47 @@
+---
+- name: Validate development commands
+  ansible.builtin.assert:
+    that:
+      - item.name is defined
+      - (item.command is defined) != (item.content is defined)
+    fail_msg: >-
+      development_commands entries must define exactly one of:
+      command or content
+  loop: "{{ development_commands }}"
+  loop_control:
+    label: "{{ item.name | default('undefined') }}"
+
+- name: Create simple commands
+  ansible.builtin.copy:
+    dest: "/usr/local/bin/{{ item.name }}"
+    owner: root
+    group: root
+    mode: "0755"
+    content: |
+      #!/bin/sh
+      exec {{ item.command }} "$@"
+  loop: >-
+    {{
+      development_commands
+      | selectattr('command', 'defined')
+      | rejectattr('content', 'defined')
+      | list
+    }}
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Create custom commands
+  ansible.builtin.copy:
+    dest: "/usr/local/bin/{{ item.name }}"
+    owner: root
+    group: root
+    mode: "0755"
+    content: "{{ item.content }}"
+  loop: >-
+    {{
+      development_commands
+      | selectattr('content', 'defined')
+      | list
+    }}
+  loop_control:
+    label: "{{ item.name }}"

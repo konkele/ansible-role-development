@@ -48,3 +48,9 @@
   when: development_talosctl_manage | bool
   tags:
     - talosctl
+
+- name: Install development commands
+  ansible.builtin.import_tasks: commands.yml
+  when: development_commands_manage | bool
+  tags:
+    - commands

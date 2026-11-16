@@ -6,10 +6,13 @@ development_kubectl_manage: true
 development_helm_manage: true
 development_talosctl_manage: true
 development_packages_manage: true
+development_commands_manage: false
 
 development_ansible_path: /opt/ansible
 
 development_kubectl_repository_version: "v1.36"
+
+development_commands: []
 
 development_packages:
   # Development

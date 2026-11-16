@@ -5,9 +5,10 @@ galaxy_info:
   author: Eric Konkel
 
   description: >-
-    Development tooling role for infrastructure and platform
-    engineering hosts, providing Ansible, OpenTofu,
-    Infisical, kubectl, Helm, and Talosctl.
+    Development workstation role for infrastructure and platform
+    engineering hosts. Installs common development and automation
+    tooling and supports creation of custom commands for
+    environment-specific workflows.
 
   license: MIT
 
@@ -32,5 +33,7 @@ galaxy_info:
     - talos
     - infisical
     - infrastructure
+    - devops
+    - sre
 
 dependencies: []
