@@ -1,0 +1,43 @@
+---
+- name: Install Ansible dependencies
+  ansible.builtin.apt:
+    name:
+      - python3
+      - python3-pip
+      - python3-venv
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Create Ansible installation directory
+  ansible.builtin.file:
+    path: "{{ development_ansible_path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Create Ansible virtual environment
+  ansible.builtin.command:
+    cmd: python3 -m venv {{ development_ansible_path }}/.venv
+    creates: "{{ development_ansible_path }}/.venv/bin/python"
+
+- name: Install Ansible packages
+  ansible.builtin.pip:
+    name:
+      - ansible
+      - ansible-lint
+    virtualenv: "{{ development_ansible_path }}/.venv"
+
+- name: Create Ansible wrappers
+  ansible.builtin.copy:
+    dest: "/usr/local/bin/{{ item }}"
+    mode: "0755"
+    content: |
+      #!/bin/sh
+      exec {{ development_ansible_path }}/.venv/bin/{{ item }} "$@"
+  loop:
+    - ansible
+    - ansible-playbook
+    - ansible-galaxy
+    - ansible-lint

@@ -1,0 +1,50 @@
+---
+- name: Ensure APT keyrings directory exists
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install development packages
+  ansible.builtin.import_tasks: packages.yml
+  when: development_packages_manage | bool
+  tags:
+    - packages
+
+- name: Install Ansible tooling
+  ansible.builtin.import_tasks: ansible.yml
+  when: development_ansible_manage | bool
+  tags:
+    - ansible
+
+- name: Install OpenTofu
+  ansible.builtin.import_tasks: opentofu.yml
+  when: development_opentofu_manage | bool
+  tags:
+    - opentofu
+
+- name: Install Infisical CLI
+  ansible.builtin.import_tasks: infisical.yml
+  when: development_infisical_manage | bool
+  tags:
+    - infisical
+
+- name: Install kubectl
+  ansible.builtin.import_tasks: kubectl.yml
+  when: development_kubectl_manage | bool
+  tags:
+    - kubectl
+
+- name: Install Helm
+  ansible.builtin.import_tasks: helm.yml
+  when: development_helm_manage | bool
+  tags:
+    - helm
+
+- name: Install Talosctl
+  ansible.builtin.import_tasks: talosctl.yml
+  when: development_talosctl_manage | bool
+  tags:
+    - talosctl

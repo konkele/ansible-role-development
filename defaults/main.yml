@@ -1,0 +1,41 @@
+---
+development_ansible_manage: true
+development_opentofu_manage: true
+development_infisical_manage: true
+development_kubectl_manage: true
+development_helm_manage: true
+development_talosctl_manage: true
+development_packages_manage: true
+
+development_ansible_path: /opt/ansible
+
+development_kubectl_repository_version: "v1.36"
+
+development_packages:
+  # Development
+  - git
+  - make
+  - build-essential
+
+  # Shell productivity
+  - bash-completion
+  - less
+  - tree
+
+  # Modern CLI tools
+  - bat
+  - fd-find
+  - jq
+  - ripgrep
+  - yq
+
+  # Infrastructure and automation
+  - direnv
+  - openssh-client
+  - pre-commit
+  - rsync
+
+  # Networking
+  - curl
+  - dnsutils
+  - traceroute

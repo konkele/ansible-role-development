@@ -1,0 +1,29 @@
+---
+- name: Download OpenTofu repository key
+  ansible.builtin.get_url:
+    url: https://packages.opentofu.org/opentofu/tofu/gpgkey
+    dest: /etc/apt/keyrings/opentofu.asc
+    mode: "0644"
+
+- name: Configure OpenTofu repository
+  ansible.builtin.deb822_repository:
+    name: opentofu
+    types:
+      - deb
+    uris:
+      - https://packages.opentofu.org/opentofu/tofu/any/
+    suites:
+      - any
+    components:
+      - main
+    signed_by: /etc/apt/keyrings/opentofu.asc
+    state: present
+  notify: Update apt cache
+
+- name: Flush handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Install OpenTofu
+  ansible.builtin.apt:
+    name: tofu
+    state: present

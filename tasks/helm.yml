@@ -1,0 +1,29 @@
+---
+- name: Download Helm repository key
+  ansible.builtin.get_url:
+    url: https://packages.buildkite.com/helm-linux/helm-debian/gpgkey
+    dest: /etc/apt/keyrings/helm.asc
+    mode: "0644"
+
+- name: Configure Helm repository
+  ansible.builtin.deb822_repository:
+    name: helm
+    types:
+      - deb
+    uris:
+      - https://packages.buildkite.com/helm-linux/helm-debian/any/
+    suites:
+      - any
+    components:
+      - main
+    signed_by: /etc/apt/keyrings/helm.asc
+    state: present
+  notify: Update apt cache
+
+- name: Flush handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Install Helm
+  ansible.builtin.apt:
+    name: helm
+    state: present
