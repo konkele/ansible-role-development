@@ -41,3 +41,4 @@
     - ansible-playbook
     - ansible-galaxy
     - ansible-lint
+    - ansible-vault
