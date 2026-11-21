@@ -22,11 +22,9 @@
     cmd: python3 -m venv {{ development_ansible_path }}/.venv
     creates: "{{ development_ansible_path }}/.venv/bin/python"
 
-- name: Install Ansible packages
+- name: Install Ansible Python packages
   ansible.builtin.pip:
-    name:
-      - ansible
-      - ansible-lint
+    name: "{{ development_ansible_python_packages }}"
     virtualenv: "{{ development_ansible_path }}/.venv"
 
 - name: Create Ansible wrappers

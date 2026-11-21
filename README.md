@@ -35,6 +35,7 @@ Supported platforms:
 
 - Install Ansible in an isolated Python virtual environment
 - Install Ansible Lint
+- Install configurable Python dependencies for Ansible collections
 - Create command wrappers in `/usr/local/bin`
 - Avoid system-wide Python conflicts
 
@@ -118,6 +119,38 @@ Installed wrapper commands:
 /usr/local/bin/ansible-playbook
 /usr/local/bin/ansible-galaxy
 /usr/local/bin/ansible-lint
+/usr/local/bin/ansible-vault
+```
+
+---
+
+### Ansible Python Packages
+
+The Ansible virtual environment can be extended with additional Python
+dependencies required by Ansible collections and automation tooling.
+
+Default:
+
+```yaml
+development_ansible_python_packages:
+  - ansible
+  - ansible-lint
+  - proxmoxer
+  - requests
+  - netaddr
+```
+
+Example override:
+
+```yaml
+development_ansible_python_packages:
+  - ansible
+  - ansible-lint
+  - proxmoxer
+  - requests
+  - netaddr
+  - kubernetes
+  - jmespath
 ```
 
 ---
@@ -348,6 +381,18 @@ development_talosctl_manage: false
 development_kubectl_repository_version: "v1.37"
 ```
 
+### Add Additional Python Dependencies
+
+```yaml
+development_ansible_python_packages:
+  - ansible
+  - ansible-lint
+  - proxmoxer
+  - netaddr
+  - kubernetes
+  - jmespath
+```
+
 ### Configure Custom Commands
 
 ```yaml
@@ -392,6 +437,7 @@ ansible
 ansible-playbook
 ansible-galaxy
 ansible-lint
+ansible-vault
 
 tofu
 infisical
@@ -415,6 +461,16 @@ ap
 ```
 
 Repository-managed tooling receives updates through standard APT workflows.
+
+The Ansible virtual environment also includes the configured Python
+dependencies such as:
+
+```text
+proxmoxer
+netaddr
+```
+
+to support infrastructure automation collections and workflows.
 
 ---
 
