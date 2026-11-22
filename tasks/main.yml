@@ -49,6 +49,12 @@
   tags:
     - talosctl
 
+- name: Install ArgoCD CLI
+  ansible.builtin.import_tasks: argocd-cli.yml
+  when: development_argocd_cli_manage | bool
+  tags:
+    - argocd-cli
+
 - name: Install development commands
   ansible.builtin.import_tasks: commands.yml
   when: development_commands_manage | bool

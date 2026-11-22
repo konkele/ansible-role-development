@@ -1,5 +1,6 @@
 ---
 development_ansible_manage: true
+development_argocd_cli_manage: true
 development_opentofu_manage: true
 development_infisical_manage: true
 development_kubectl_manage: true
@@ -16,6 +17,8 @@ development_ansible_python_packages:
   - proxmoxer
   - requests
   - netaddr
+
+development_argocd_cli_version: "v3.6.2"
 
 development_kubectl_repository_version: "v1.36"
 
