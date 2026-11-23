@@ -27,3 +27,22 @@
   ansible.builtin.apt:
     name: helm
     state: present
+
+- name: Install Helm
+  ansible.builtin.apt:
+    name: helm
+    state: present
+
+- name: Get Helm plugins directory
+  ansible.builtin.command:
+    cmd: helm env HELM_PLUGINS
+  register: helm_plugins_dir
+  changed_when: false
+
+- name: Install Helm diff plugin
+  ansible.builtin.command:
+    cmd: >-
+      helm plugin install
+      --verify=false
+      https://github.com/databus23/helm-diff
+    creates: "{{ helm_plugins_dir.stdout }}/helm-diff"
